@@ -2,13 +2,26 @@ import re
 
 def div_comandos(text:str):
     """
-    Divine los caracteres de los comandos en una lista
+    Divide los caracteres de los comandos en una lista
     """
 
     lista = re.split(r"[,()]", text)
     lista = [x.strip() for x in lista if x]
     return lista
 
+
+def rev_defVar(text: str):
+    """
+    Revisa que los defVar estan bien escritos
+    """
+
+    tokens = text.split()
+    esp = re.match(r"^defVar\s(.*)\s(.*)$", text)
+
+    if tokens[0] == "defVar" and len(tokens) == 3 and tokens[1].isalpha() and (tokens[2].isdigit() or tokens[2].isalpha()) and esp:
+         return True
+
+    return False    
 
 def rev_jump(text: str):
     """
@@ -26,6 +39,8 @@ def rev_jump(text: str):
             return True
     
     return False
+
+"""print(rev_jump("jump(1,2)"))"""
 
 def rev_walk(text: str):
     """
@@ -167,4 +182,3 @@ def rev_nop(text: str):
         return True
     
     return False
-
