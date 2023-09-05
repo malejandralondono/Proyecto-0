@@ -7,21 +7,24 @@ def div_comandos(text:str):
 
     lista = re.split(r"[,()]", text)
     lista = [x.strip() for x in lista if x]
+    print(lista)
     return lista
 
-
-def rev_defVar(text: str):
+def rev_defVar(text1, text2, text3):
     """
     Revisa que los defVar estan bien escritos
     """
+    if text1 == "defVar" and type(text2)== str and text3.isnumeric(): 
+        return True
+    else: 
+         return False   
 
-    tokens = text.split()
-    esp = re.match(r"^defVar\s(.*)\s(.*)$", text)
-
-    if tokens[0] == "defVar" and len(tokens) == 3 and tokens[1].isalpha() and (tokens[2].isdigit() or tokens[2].isalpha()) and esp:
-         return True
-
-    return False    
+def rev_dec_defProc(text1, text2, text3):
+     
+     if  text1 == "defProc" and type(text2)== str and text3[0]=="(" and text3[-1]==")" and( (text3[1:-1]).replace(",", "").isnumeric() or (text3[1:-1]).replace(",", "").isalpha()):
+          return True
+     else: 
+         return False   
 
 def rev_jump(text: str):
     """
@@ -39,8 +42,6 @@ def rev_jump(text: str):
             return True
     
     return False
-
-"""print(rev_jump("jump(1,2)"))"""
 
 def rev_walk(text: str):
     """
@@ -182,3 +183,103 @@ def rev_nop(text: str):
         return True
     
     return False
+
+def rev_parentesis_balanced(text: str): 
+     
+    open_list = ["{","("]
+    close_list = ["}",")"]
+    
+    stack = []
+    for i in text:
+            if i in open_list:
+                stack.append(i)
+            elif i in close_list:
+                pos = close_list.index(i)
+                if ((len(stack) > 0) and
+                    (open_list[pos] == stack[len(stack)-1])):
+                    stack.pop()
+                else:
+                    return False
+    if len(stack) == 0:
+            return True
+    else:
+            return False
+    
+def rev_parentesis_extra(text:str):
+     es = True
+     if ("[" or "]" or "((" or ")(")in text:
+          es = False
+     return es
+
+def div_text(text:str):
+    x = text.replace(')',' ) ')
+    x = x.replace("(", " ( ")
+    x = x.replace("{", " { ")
+    x = x.replace(")", " ) ")
+    x = x.split()
+    return x
+
+
+#def comandos
+
+def entrada_texto(text: str):
+    if rev_parentesis_balanced(text) == False:
+        return "No"
+    if rev_parentesis_extra(text) == False:
+        return "No"
+    else:
+        text = div_text(text)
+        while text != []:
+            if text[0]== "defVar":
+                if rev_defVar(text[0],text[1],text[2])== True:
+                    i= 3
+                    while i!= 0 :                
+                     text.pop(0)
+                     i -=1
+            elif text[0]== "defProc":
+                text0= text[0]
+                text1= text[1]
+                i= 2
+                while i!= 0 :                
+                   text.pop(0)
+                   i -=1
+                cont= True
+                x= 0
+                text3=""
+                while x!=len(text) and (cont):
+                    text3 += text[x]
+                    if text[x]== ")":
+                        cont = False  
+                    x +=1
+                if (cont):
+                    return "No"
+                else:
+                    if rev_dec_defProc(text0, text1, text3)== True:
+                          while x!= 0 :                
+                           text.pop(0)
+                           x -=1
+                if text[0]!="{": 
+                     return "No"
+                else:
+                    cont= True
+                    x= 0
+                    comandos= ""
+                    while x!=len(text) and (cont):
+                        comandos += text[x]
+                        print(comandos)
+                        if text[x]== "}":
+                            cont = False  
+                        x +=1
+                    print(div_comandos(comandos))
+        text=[]                  
+    return None             
+            
+
+
+
+         
+          
+     
+    
+         
+print(entrada_texto("defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c , b ) { drop( c ) ; letGo ( b ) ; } 3 defProc goNorth () {while can(walk(1 , north ) ) { walk(1 , north ) } } { jump (3 ,3) ; putCB (2 ,1) }"))
