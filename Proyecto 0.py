@@ -1,5 +1,8 @@
 import re 
 
+lista_variables = []
+lista_proc= []
+
 def div_comandos(text:str):
     """
     Divide los caracteres de los comandos en una lista
@@ -10,7 +13,7 @@ def div_comandos(text:str):
     print(lista)
     return lista
 
-def rev_defVar(text: str):
+def rev_defVar(text1, text2, text3):
     """
     Revisa que los defVar estan bien escritos
     """
@@ -245,74 +248,10 @@ def div_text(text:str):
     x = text.replace(')',' ) ')
     x = x.replace("(", " ( ")
     x = x.replace("{", " { ")
-    x = x.replace(")", " ) ")
+    x = x.replace("{", " } ")
     x = x.split()
     return x
 
-
-#def comandos
-
-def entrada_texto(text: str):
-    if rev_parentesis_balanced(text) == False:
-        return "No"
-    if rev_parentesis_extra(text) == False:
-        return "No"
-    else:
-        text = div_text(text)
-        while text != []:
-            if text[0]== "defVar":
-                if rev_defVar(text[0],text[1],text[2])== True:
-                    i= 3
-                    while i!= 0 :                
-                     text.pop(0)
-                     i -=1
-            elif text[0]== "defProc":
-                text0= text[0]
-                text1= text[1]
-                i= 2
-                while i!= 0 :                
-                   text.pop(0)
-                   i -=1
-                cont= True
-                x= 0
-                text3=""
-                while x!=len(text) and (cont):
-                    text3 += text[x]
-                    if text[x]== ")":
-                        cont = False  
-                    x +=1
-                if (cont):
-                    return "No"
-                else:
-                    if rev_dec_defProc(text0, text1, text3)== True:
-                          while x!= 0 :                
-                           text.pop(0)
-                           x -=1
-                if text[0]!="{": 
-                     return "No"
-                else:
-                    cont= True
-                    x= 0
-                    comandos= ""
-                    while x!=len(text) and (cont):
-                        comandos += text[x]
-                        print(comandos)
-                        if text[x]== "}":
-                            cont = False  
-                        x +=1
-                    print(div_comandos(comandos))
-        text=[]                  
-    return None             
-            
-
-
-
-         
-          
-     
-    
-         
-print(entrada_texto("defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c , b ) { drop( c ) ; letGo ( b ) ; } 3 defProc goNorth () {while can(walk(1 , north ) ) { walk(1 , north ) } } { jump (3 ,3) ; putCB (2 ,1) }"))
 def rev_facing(text: str):
     """
     Revisar si el condicional facing esta bien 
@@ -374,3 +313,111 @@ def rev_not(text: str):
             return rev_not(condicional)
         
     return False
+
+def comandos(text):
+        text= div_text(text)
+        text= (text[1:-1])
+        while text!=[]:
+            cont= True
+            x= 0
+            comando=""
+            while x!=len(text) and (cont):
+                comando += text[x]
+                if text[x]== ")":
+                    cont = False  
+                x +=1
+            comando= div_text(comando)
+            if comando[0]== "jump":
+                if rev_jump(comando) == False:
+                    return False
+            elif comando[0]== "walk":
+                if rev_walk(comando) == False:
+                    return False
+            elif comando[0]== "leap":
+                if rev_leap(comando) == False:
+                    return False
+            elif comando[0]== "turn":
+                if rev_turn(comando) == False:
+                    return False
+            elif comando[0]== "turnto":
+                if rev_turnto(comando) == False:
+                    return False
+            elif comando[0]== "drop":
+                if rev_drop(comando) == False:
+                    return False
+            elif comando[0]== "get":
+                if rev_get(comando) == False:
+                    return False
+            elif comando[0]== "grab":
+                if rev_grab(comando) == False:
+                    return False
+            elif comando[0]== "letGo":
+                if rev_letGo(comando) == False:
+                    return False
+            elif comando[0]== "nop":
+                if rev_nop(comando) == False:
+                    return False
+            else:
+                return False
+            
+def entrada_texto(text: str):
+
+    if rev_parentesis_balanced(text) == False:
+        return "No"
+    if rev_parentesis_extra(text) == False:
+        return "No"
+    else:
+        text = div_text(text)
+        while text != []:
+            if text[0]== "defVar":
+                lista_variables.append(text[1])
+                if rev_defVar(text[0],text[1],text[2])== True:
+                    i= 3
+                    while i!= 0 :                
+                     text.pop(0)
+                     i -=1
+                else:
+                    return "No"
+            elif text[0]== "defProc":
+                text0= text[0]
+                lista_proc.append(text[1])
+                text1= text[1]
+                i= 2
+                while i!= 0 :                
+                   text.pop(0)
+                   i -=1
+                cont= True
+                x= 0
+                text3=""
+                while x!=len(text) and (cont):
+                    text3 += text[x]
+                    if text[x]== ")":
+                        cont = False  
+                    x +=1
+                if (cont):
+                    return "No"
+                else:
+                    if rev_dec_defProc(text0, text1, text3)== True:
+                          while x!= 0 :                
+                           text.pop(0)
+                           x -=1
+                    else:
+                        return "No"
+                if text[0]!="{": 
+                     return "No"
+                else:
+                    cont= True
+                    x= 0
+                    comandos= ""
+                    while x!=len(text) and (cont):
+                        comandos += text[x]
+                        print(comandos)
+                        if text[x]== "}":
+                            cont = False  
+                        x +=1
+                    print(div_text(comandos))
+        text=[]                  
+    return None             
+            
+        
+print(entrada_texto("defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c , b ) { drop( c ) ; letGo ( b ) ; walk( n )} defProc goNorth () {while can(walk(1 , north ) ) { walk(1 , north ) } } { jump (3 ,3) ; putCB (2 ,1) }"))
