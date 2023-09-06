@@ -1,22 +1,16 @@
 import re 
 
+w_2 = ["front", "right", "left", "back"] 
+w_3 = ["north", "south", "west", "east"]
+commands = ["jump", "walk", "leap", "turn", "turnto", "drop", "get", "grab", "letGo", "nop"]
 lista_variables = []
-lista_proc= []
-
-def div_comandos(text:str):
-    """
-    Divide los caracteres de los comandos en una lista
-    """
-
-    lista = re.split(r"[,()]|:", text)
-    lista = [x.strip() for x in lista if x]
-    print(lista)
-    return lista
+lista_proc= {}
 
 def rev_defVar(text1, text2, text3):
     """
     Revisa que los defVar estan bien escritos
     """
+    text2
     if text1 == "defVar" and type(text2)== str and text3.isnumeric(): 
         return True
     else: 
@@ -24,195 +18,261 @@ def rev_defVar(text1, text2, text3):
 
 def rev_dec_defProc(text1, text2, text3):
      
-     if  text1 == "defProc" and type(text2)== str and text3[0]=="(" and text3[-1]==")" and( (text3[1:-1]).replace(",", "").isnumeric() or (text3[1:-1]).replace(",", "").isalpha()):
+     if  text1 == "defProc" and type(text2)== str and text3[0]=="(" and text3[-1]==")" and( (text3[1:-1]).replace(",", "").isnumeric() or (text3[1:-1]).replace(",", "").isalpha() or (text3[1:-1])== ""):
           return True
      else: 
          return False   
 
-def remove_can(text):
-    """
-    Remover can para verificar el comando
-    """
-    match = re.match(r"can\((.*)\)", text)
-
-    if match is None:
-        return text
-
-    expression = match.group(1)
-
-    return text.replace(match.group(0), expression)
-
-def remove_not(texto: str) -> str:
-    """
-    Remover not para verificar el condicional
-    """
-
-    patron = re.compile(r"^not:")
-    return patron.sub('', texto).strip()
-
-def rev_jump(text: str):
+def rev_jump(text: str, es_parte_proc):
     """
     Revisa si la accion jump es correcta
     """
+    x= text.replace("jump","jump " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)  
 
-    tokens = div_comandos(text)
+    if  (es_parte_proc[0]) :
+        if tokens[0] == "jump":
+            if len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables or tokens[1] in lista_proc[es_parte_proc[1]]) and tokens[2] == "," and (tokens[3].isnumeric() or tokens[3] in lista_variables or tokens[3] in lista_proc[es_parte_proc[1]]):
+                    return True 
+                else: 
+                    return False
+            else:
+                return False    
+        else:
+            return False
+    else:
+        if tokens[0] == "jump":
+            if len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables) and tokens[2] == "," and (tokens[3].isnumeric() or tokens[3] in lista_variables):
+                    return True 
+                else: 
+                    return False
+            else:
+                return False    
+        else:
+            return False
 
-    try:
-        x, y = int(tokens[1]), int(tokens[2])
-    except (IndexError, ValueError):
-        return False
-    
-    if len(tokens) == 3 and tokens[0] == "jump" and isinstance(x, int) and isinstance(y, int):
-        return True
-    
-    return False
-
-def rev_walk(text: str):
+def rev_walk(text: str, es_parte_proc):
     """
     Revisa si las acciones walk son correctas
     """
-
-    tokens = div_comandos(text)
     w_2 = ["front", "right", "left", "back"] 
     w_3 = ["north", "south", "west", "east"]
 
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
+    x= text.replace("walk","walk " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)    
     
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "walk":
-        return True
-    
-    if len(tokens) == 3 and isinstance(x, int) and tokens[0] == "walk" and (tokens[2] in w_2 or tokens[2] in w_3):
-        return True
-
-    return False
-
-def rev_leap(text: str):
+    if  (es_parte_proc[0]) :
+        if tokens[0] == "walk":
+            if len(tokens) == 2:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables or tokens[1] in lista_proc[es_parte_proc[1]]):
+                    return True
+                else: 
+                    return False
+            elif len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables or tokens[1] in lista_proc[es_parte_proc[1]]) and tokens[2] == "," and (tokens[3] in w_2 or tokens[3] in w_3):
+                    return True 
+                else: 
+                    return False
+            else: 
+                return False
+        else:
+            return False
+    else:
+        if tokens[0] == "walk":
+            if len(tokens) == 2:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables):
+                    return True
+                else: 
+                    return False
+            elif len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables) and tokens[2] == "," and (tokens[3] in w_2 or tokens[3] in w_3):
+                    return True 
+                else: 
+                    return False
+            else: 
+                return False
+        else:
+            return False
+        
+def rev_leap(text: str, es_parte_proc):
     """
     Revisa si las acciones leap son correctas
     """
 
-    tokens = div_comandos(text)
-    l_2 = ["front", "right", "left", "back"] 
-    l_3 = ["north", "south", "west", "east"]
+    w_2 = ["front", "right", "left", "back"] 
+    w_3 = ["north", "south", "west", "east"]
 
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
+    x= text.replace("leap","leap " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)    
     
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "leap":
-        return True
+    if  (es_parte_proc[0]) :
+        if tokens[0] == "leap":
+            if len(tokens) == 2:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables or tokens[1] in lista_proc[es_parte_proc[1]]):
+                    return True
+                else: 
+                    return False
+            elif len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables or tokens[1] in lista_proc[es_parte_proc[1]]) and tokens[2] == "," and (tokens[3] in w_2 or tokens[3] in w_3):
+                    return True 
+                else: 
+                    return False
+            else: 
+                return False
+        else:
+            return False
+    else:
+        if tokens[0] == "leap":
+            if len(tokens) == 2:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables):
+                    return True
+                else: 
+                    return False
+            elif len(tokens) == 4:
+                if (tokens[1].isnumeric() or tokens[1] in lista_variables) and tokens[2] == "," and (tokens[3] in w_2 or tokens[3] in w_3):
+                    return True 
+                else: 
+                    return False
+            else: 
+                return False
+        else:
+            return False
     
-    if len(tokens) == 3 and isinstance(x, int) and tokens[0] == "leap" and (tokens[2] in l_2 or tokens[2] in l_3):
-        return True
-
-    return False
-
-def rev_turn(text: str):
+def rev_turn(text: str, es_parte_proc):
     """
     Revisa si la accion turn es correcta 
     """
     
-    tokens = div_comandos(text)
     t = ["left", "right", "around"]
+    
+    x= text.replace("turn","turn " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
+    
+    if len(tokens) == 2 and tokens[0] == "turn" and (tokens[1] in t ):
+        return True
+    else:
+        return False
 
-    if len(tokens) == 2 and tokens[0] == "turn" and tokens[1] in t:
-        return True 
-        
-    return False
-
-def rev_turnto(text: str):
+def rev_turnto(text: str, es_parte_proc):
     """
     Revisa si la accion turnto es correcta
     """
-
-    tokens = div_comandos(text)
     t=  ["north", "south", "west", "east"]
+
+    x= text.replace("turnto","turnto " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
 
     if len(tokens) == 2 and tokens[0] == "turnto" and tokens[1] in t:
         return True 
 
     return False
 
-def rev_drop(text: str):
+def rev_drop(text: str, es_parte_proc):
     """
     Revisa si la accion drop es correcta
     """
+    x= text.replace("drop","drop " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
 
-    tokens = div_comandos(text)
+    if  (es_parte_proc[0]):
+        if len(tokens) == 2 and tokens[0] == "drop" and (tokens[1].isnumeric() or tokens[1] in lista_variables or  tokens[1] in lista_proc[es_parte_proc[1]]):
+            return True
+        else:
+            return False
+    else:
+        if len(tokens) == 2 and tokens[0] == "drop" and (tokens[1].isnumeric() or tokens[1] in lista_variables ):
+            return True
+        else:
+            return False
 
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
-    
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "drop":
-        return True
-    
-    return False
-
-def rev_get(text: str):
+def rev_get(text: str, es_parte_proc):
     """
     Revisa si la accion get es correcta
     """
 
-    tokens = div_comandos(text)
-
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
+    x= text.replace("get","get " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
     
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "get":
-        return True
-    
-    return False
+    if  (es_parte_proc[0]):
+        if len(tokens) == 2 and tokens[0] == "get" and (tokens[1].isnumeric() or tokens[1] in lista_variables or  tokens[1] in lista_proc[es_parte_proc[1]]):
+            return True
+        else:
+            return False
+    else:
+        if len(tokens) == 2 and tokens[0] == "get" and (tokens[1].isnumeric() or tokens[1] in lista_variables ):
+            return True
+        else:
+            return False
 
-def rev_grab(text: str):
+def rev_grab(text: str, es_parte_proc):
     """
     Revisa si la accion grab es correcta
     """
 
-    tokens = div_comandos(text)
-
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
+    x= text.replace("grab","grab " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
     
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "grab":
-        return True
-    
-    return False
+    if  (es_parte_proc[0]):
+        if len(tokens) == 2 and tokens[0] == "grab" and (tokens[1].isnumeric() or tokens[1] in lista_variables or  tokens[1] in lista_proc[es_parte_proc[1]]):
+            return True
+        else:
+            return False
+    else:
+        if len(tokens) == 2 and tokens[0] == "grab" and (tokens[1].isnumeric() or tokens[1] in lista_variables ):
+            return True
+        else:
+            return False
 
-def rev_letGo(text: str):
+def rev_letGo(text: str, es_parte_proc):
     """
-    Revisa si la accion letGO es correcta
+    Revisa si la accion letGo es correcta
     """
 
-    tokens = div_comandos(text)
-
-    try:
-        x = int(tokens[1])
-    except (IndexError, ValueError):
-        return False
+    x= text.replace("letGo","letGo " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
     
-    if len(tokens) == 2 and isinstance(x, int) and tokens[0] == "letGo":
-        return True
+    if  (es_parte_proc[0]):
+        if len(tokens) == 2 and tokens[0] == "letGo" and (tokens[1].isnumeric() or tokens[1] in lista_variables or  tokens[1] in lista_proc[es_parte_proc[1]]):
+            return True
+        else:
+            return False
+    else:
+        if len(tokens) == 2 and tokens[0] == "letGo" and (tokens[1].isnumeric() or tokens[1] in lista_variables ):
+            return True
+        else:
+            return False
     
-    return False
-
-def rev_nop(text: str):
+def rev_nop(text: str , es_parte_proc):
     """
     Revisa si la accion nop es correcta
     """
 
-    tokens = div_comandos(text)
+    x= text.replace("nop","nop " )
+    x = x.replace(')','')
+    x = x.replace("(", "")
+    tokens = div_text(x)
 
-    if len(tokens) == 1 and text == "nop()" and tokens[0] == "nop":
+    if len(tokens) == 1 and tokens[0] == "nop":
         return True
     
     return False
@@ -246,9 +306,10 @@ def rev_parentesis_extra(text:str):
 
 def div_text(text:str):
     x = text.replace(')',' ) ')
+    x= x.replace(",", " , ")
     x = x.replace("(", " ( ")
     x = x.replace("{", " { ")
-    x = x.replace("{", " } ")
+    x = x.replace("}", " } ")
     x = x.split()
     return x
 
@@ -314,59 +375,134 @@ def rev_not(text: str):
         
     return False
 
-def comandos(text):
+def rev_comandos(text, es_parte):
+        text= text.replace(";", " ; ")
+        text= text.replace(",", " , ")
+        text= text.replace("{","")
         text= div_text(text)
-        text= (text[1:-1])
-        while text!=[]:
+        print(text)
+        
+        mas= True
+        while text!=[] and (mas):
             cont= True
             x= 0
-            comando=""
+            cmd=""
             while x!=len(text) and (cont):
-                comando += text[x]
-                if text[x]== ")":
-                    cont = False  
+                cmd += text[x]
+                if text[x]==")":
+                    cont = False
                 x +=1
-            comando= div_text(comando)
+            cmd= cmd.replace(";", " ; ")
+            cmd= cmd.replace(",", " , ")
+            comando= div_text(cmd)
             if comando[0]== "jump":
-                if rev_jump(comando) == False:
+                if rev_jump(cmd,es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "walk":
-                if rev_walk(comando) == False:
+                if rev_walk(cmd,es_parte) == False:
+                    print("xd")
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "leap":
-                if rev_leap(comando) == False:
+                if rev_leap(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "turn":
-                if rev_turn(comando) == False:
+                if rev_turn(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "turnto":
-                if rev_turnto(comando) == False:
+                if rev_turnto(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "drop":
-                if rev_drop(comando) == False:
+                if rev_drop(cmd, es_parte) == False:
+                    
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "get":
-                if rev_get(comando) == False:
+                if rev_get(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "grab":
-                if rev_grab(comando) == False:
+                if rev_grab(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "letGo":
-                if rev_letGo(comando) == False:
+                if rev_letGo(cmd, es_parte) == False:
+                    print("xd")
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             elif comando[0]== "nop":
-                if rev_nop(comando) == False:
+                if rev_nop(cmd, es_parte) == False:
+                    mas = False
                     return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
+            elif comando[0] in lista_proc:
+                cmd= div_text(cmd)
+                cmd.remove(comando[0])
+                cmd.remove(",")
+                cmd= cmd[1:-1]
+                if len(cmd)!= len(lista_proc[comando[0]]):
+                    return False
+                else:
+                    while x+1!= 0 :                
+                        text.pop(0)
+                        x -=1
             else:
+                mas = False
                 return False
-            
+        if text == [] :
+            return True
+
 def entrada_texto(text: str):
 
     if rev_parentesis_balanced(text) == False:
-        return "No"
+        return "No1"
     if rev_parentesis_extra(text) == False:
-        return "No"
+        return "No2"
     else:
+        no_es_parte_proc= (False,1)
         text = div_text(text)
         while text != []:
             if text[0]== "defVar":
@@ -377,11 +513,12 @@ def entrada_texto(text: str):
                      text.pop(0)
                      i -=1
                 else:
-                    return "No"
+                    return "No3"
             elif text[0]== "defProc":
+                lista= []
                 text0= text[0]
-                lista_proc.append(text[1])
                 text1= text[1]
+                es_parte_proc = (True, text[1])
                 i= 2
                 while i!= 0 :                
                    text.pop(0)
@@ -391,33 +528,339 @@ def entrada_texto(text: str):
                 text3=""
                 while x!=len(text) and (cont):
                     text3 += text[x]
+                    if text[x].isalpha():
+                        lista.append(text[x])
                     if text[x]== ")":
                         cont = False  
                     x +=1
+                lista_proc[text1] = lista
                 if (cont):
-                    return "No"
+                    return "No4"
                 else:
                     if rev_dec_defProc(text0, text1, text3)== True:
                           while x!= 0 :                
                            text.pop(0)
                            x -=1
                     else:
-                        return "No"
-                if text[0]!="{": 
-                     return "No"
+                        return "No5"
+                if text ==[]:
+                    return "No6"
+                elif text[0]!="{": 
+                     return "No7"
                 else:
-                    cont= True
+                    if text[1]== "while" and text[2]!= "can":
+                        return "No8"
+                    elif text[1]== "while":
+                        text.remove("{")
+                        text.remove("while")
+                        text.remove("can")
+                        text.remove("}")
+                        cont= True
+                        lqvddw= ""
+                        np=0
+                        np2=0
+                        w=0
+                        while cont:
+                            lqvddw += text[w]
+                            if text[w]== "(":
+                                np +=1
+                            if text[w]== ")":
+                                np2 +=1
+                            if np == np2:
+                                cont = False
+                            w +=1
+                        lqvddw=lqvddw.replace("(","",1)
+                        lqvddw=lqvddw.replace(")","",1)
+                        while w!=0:
+                            text.pop(0)
+                            w-=1
+                        si= True
+                        x= 0
+                        comandos= ""
+                        n_corch = 0
+                        n_corch2 = 0
+                        while si:
+                            comandos += text[x]
+                            if text[x]== "{":
+                                n_corch +=1
+                            if text[x]== "}":
+                                n_corch2 +=1
+                            if n_corch == n_corch2:
+                                si = False
+                            x +=1
+                        if comandos[1:-1] != lqvddw:
+                            return "No9"
+                        elif rev_comandos(comandos, (es_parte_proc))== True:
+                            while x!= 0 :                
+                                text.pop(0)
+                                x -=1
+                        else:
+                            return "No10"
+                    
+                    elif text[1]== "if" and text[2]!= "can":
+                        return "No11"
+                    elif text[1]== "if":
+                        text.remove("{")
+                        text.remove("if")
+                        text.remove("can")
+                        cont= True
+                        lqvddw= ""
+                        np=0
+                        np2=0
+                        w=0
+                        while cont:
+                            lqvddw += text[w]
+                            if text[w]== "(":
+                                np +=1
+                            if text[w]== ")":
+                                np2 +=1
+                            if np == np2:
+                                cont = False
+                            w +=1
+                        lqvddw=lqvddw.replace("(","",1)
+                        lqvddw=lqvddw.replace(")","",1)
+                        while w!=0:
+                            text.pop(0)
+                            w-=1
+                        si= True
+                        x= 0
+                        comandos= ""
+                        n_corch = 0
+                        n_corch2 = 0
+                        while si:
+                            comandos += text[x]
+                            if text[x]== "{":
+                                n_corch +=1
+                            if text[x]== "}":
+                                n_corch2 +=1
+                            if n_corch == n_corch2:
+                                si = False
+                            x +=1
+                        if lqvddw not in comandos[1:-1]:
+                            return "No12"
+                        elif rev_comandos(comandos, (es_parte_proc))== True:
+                            
+                            while x!= 0 :                
+                                text.pop(0)
+                                x -=1
+                        else:
+                            return "No13" 
+                        if text[0]== "else":
+                            text.remove("else")
+                            text.remove("}")
+                            si= True
+                            x= 0
+                            comandos= ""
+                            n_corch = 0
+                            n_corch2 = 0
+                            while si:
+                                comandos += text[x]
+                                if text[x]== "{":
+                                    n_corch +=1
+                                if text[x]== "}":
+                                    n_corch2 +=1
+                                if n_corch == n_corch2:
+                                    si = False
+                                x +=1
+                            if rev_comandos(comandos, (es_parte_proc))== True:
+                                while x!= 0 :                
+                                    text.pop(0)
+                                    x -=1
+                            else:
+                                return "No14"
+                    else:
+                        si= True
+                        x= 0
+                        comandos= ""
+                        n_corch = 0
+                        n_corch2 = 0
+                        while si:
+                            comandos += text[x]
+                            if text[x]== "{":
+                                n_corch +=1
+                            if text[x]== "}":
+                                n_corch2 +=1
+                            if n_corch == n_corch2:
+                                si = False
+                            x +=1
+                    if rev_comandos(comandos, (es_parte_proc))== True:
+                        while x!= 0 :                
+                            text.pop(0)
+                            x -=1
+                    else:
+                        return "No15"
+            elif text[0]== "{":
+                si= True
+                x= 0
+                comandos= ""
+                n_corch = 0
+                n_corch2 = 0
+                while si:
+                    comandos += text[x]
+                    if text[x]== "{":
+                        n_corch +=1
+                    if text[x]== "}":
+                        n_corch2 +=1
+                    if n_corch == n_corch2:
+                        si = False
+                    x +=1
+                if rev_comandos(comandos, (no_es_parte_proc))== True:
+                        while x!= 0 :                
+                            text.pop(0)
+                            x -=1
+                else:
+                    return "No16"
+            elif text[0] in commands or text[0] in lista_proc:
+                comandos = text[0]
+                text.pop(0)
+                si= True
+                x= 0
+                n_corch = 0
+                n_corch2 = 0
+                while si:
+                    comandos += text[x]
+                    if text[x]== "(":
+                        n_corch +=1
+                    if text[x]== ")":
+                        n_corch2 +=1
+                    if n_corch == n_corch2:
+                        si = False
+                    x +=1
+                if rev_comandos(comandos, (no_es_parte_proc))== True:
+                        while x!= 0 :                
+                            text.pop(0)
+                            x -=1
+            elif text[0] in lista_variables:
+                text.pop(0)
+                text.remove("=")
+                if (text[0].isalnum)== False or text[0] not in w_3 or text[0] not in w_2:
+                    return False
+                else:
+                    text.pop(0)
+                    if text[0]== ",":
+                        text.pop(0)
+            elif text[1]== "while" and text[2]!= "can":
+                        return "No8"
+            elif text[1]== "while":
+                        text.remove("{")
+                        text.remove("while")
+                        text.remove("can")
+                        text.remove("}")
+                        cont= True
+                        lqvddw= ""
+                        np=0
+                        np2=0
+                        w=0
+                        while cont:
+                            lqvddw += text[w]
+                            if text[w]== "(":
+                                np +=1
+                            if text[w]== ")":
+                                np2 +=1
+                            if np == np2:
+                                cont = False
+                            w +=1
+                        lqvddw=lqvddw.replace("(","",1)
+                        lqvddw=lqvddw.replace(")","",1)
+                        while w!=0:
+                            text.pop(0)
+                            w-=1
+                        si= True
+                        x= 0
+                        comandos= ""
+                        n_corch = 0
+                        n_corch2 = 0
+                        while si:
+                            comandos += text[x]
+                            if text[x]== "{":
+                                n_corch +=1
+                            if text[x]== "}":
+                                n_corch2 +=1
+                            if n_corch == n_corch2:
+                                si = False
+                            x +=1
+                        if comandos[1:-1] != lqvddw:
+                            return "No9"
+                        elif rev_comandos(comandos, (no_es_parte_proc))== True:
+                            while x!= 0 :                
+                                text.pop(0)
+                                x -=1
+                        else:
+                            return "No10"
+                    
+            elif text[1]== "if" and text[2]!= "can":
+                return "No11"
+            elif text[1]== "if":
+                text.remove("{")
+                text.remove("if")
+                text.remove("can")
+                cont= True
+                lqvddw= ""
+                np=0
+                np2=0
+                w=0
+                while cont:
+                    lqvddw += text[w]
+                    if text[w]== "(":
+                        np +=1
+                    if text[w]== ")":
+                        np2 +=1
+                    if np == np2:
+                        cont = False
+                    w +=1
+                lqvddw=lqvddw.replace("(","",1)
+                lqvddw=lqvddw.replace(")","",1)
+                while w!=0:
+                    text.pop(0)
+                    w-=1
+                si= True
+                x= 0
+                comandos= ""
+                n_corch = 0
+                n_corch2 = 0
+                while si:
+                    comandos += text[x]
+                    if text[x]== "{":
+                        n_corch +=1
+                    if text[x]== "}":
+                        n_corch2 +=1
+                    if n_corch == n_corch2:
+                        si = False
+                    x +=1
+                if lqvddw not in comandos[1:-1]:
+                    return "No12"
+                elif rev_comandos(comandos, (no_es_parte_proc))== True:
+                    
+                    while x!= 0 :                
+                        text.pop(0)
+                        x -=1
+                else:
+                    return "No13" 
+                if text[0]== "else":
+                    text.remove("else")
+                    text.remove("}")
+                    si= True
                     x= 0
                     comandos= ""
-                    while x!=len(text) and (cont):
+                    n_corch = 0
+                    n_corch2 = 0
+                    while si:
                         comandos += text[x]
-                        print(comandos)
+                        if text[x]== "{":
+                            n_corch +=1
                         if text[x]== "}":
-                            cont = False  
+                            n_corch2 +=1
+                        if n_corch == n_corch2:
+                            si = False
                         x +=1
-                    print(div_text(comandos))
-        text=[]                  
-    return None             
+                    if rev_comandos(comandos, (no_es_parte_proc))== True:
+                        while x!= 0 :                
+                            text.pop(0)
+                            x -=1
+                    else:
+                        return "No14"
+    return "Si"             
             
-        
-print(entrada_texto("defVar nom 0 defVar x 0 defVar y 0 defVar one 0 defProc putCB (c , b ) { drop( c ) ; letGo ( b ) ; walk( n )} defProc goNorth () {while can(walk(1 , north ) ) { walk(1 , north ) } } { jump (3 ,3) ; putCB (2 ,1) }"))
+print("escriba el texto a revisar")
+x= input()
+print(entrada_texto(x))
