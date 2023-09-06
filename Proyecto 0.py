@@ -380,7 +380,6 @@ def rev_comandos(text, es_parte):
         text= text.replace(",", " , ")
         text= text.replace("{","")
         text= div_text(text)
-        print(text)
         
         mas= True
         while text!=[] and (mas):
@@ -405,7 +404,6 @@ def rev_comandos(text, es_parte):
                         x -=1
             elif comando[0]== "walk":
                 if rev_walk(cmd,es_parte) == False:
-                    print("xd")
                     mas = False
                     return False
                 else:
@@ -463,7 +461,6 @@ def rev_comandos(text, es_parte):
                         x -=1
             elif comando[0]== "letGo":
                 if rev_letGo(cmd, es_parte) == False:
-                    print("xd")
                     mas = False
                     return False
                 else:
